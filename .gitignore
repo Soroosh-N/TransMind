@@ -1,1 +1,5 @@
 /README.txt
+/data/raw/gtfs/*.zip
+/data/processed/*.json
+__pycache__/
+*.pyc
