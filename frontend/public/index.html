@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>TransitMind · Salt Lake County</title>
+  <link rel="stylesheet" href="/assets/styles.css">
+  <script src="/assets/app.js" defer></script>
+</head>
+<body>
+  <header><span class="brand">TM</span><div><strong>TransitMind</strong><span>Salt Lake County · transit disruption lab</span></div><a href="/docs">API docs</a></header>
+  <main>
+    <section class="intro"><p class="eyebrow">REAL SCHEDULES. EXPLICIT SIMULATION.</p><h1>See what a delay changes.</h1><p>Follow a Route 45 connection at Murray Central, then find the next feasible journey to Millcreek.</p></section>
+    <section class="controls" aria-label="Simulation controls"><label for="delay">Assumed bus delay <strong id="delay-label">10 minutes</strong></label><input type="range" id="delay" min="0" max="30" value="10" step="1"><button id="run">Calculate impact</button><button id="reset" class="secondary">Reset to normal</button></section>
+    <p id="status" role="status" aria-live="polite">Loading the routing dataset…</p>
+    <section id="results" hidden>
+      <div class="meta"><span id="date"></span><span>Simulated incident · published schedules</span></div>
+      <div class="cards"><article><p class="eyebrow">WITHOUT DISRUPTION</p><h2 id="normal-arrival"></h2><div id="normal-legs"></div></article><article class="alternative"><p class="eyebrow">BEST FEASIBLE CONNECTION</p><h2 id="alternative-arrival"></h2><div id="alternative-legs"></div></article></div>
+      <aside id="alert" role="status"></aside>
+      <article class="map-panel"><h2>Journey geography</h2><p>Local geographic sketch from GTFS stop positions and OpenStreetMap path data. No external map tiles.</p><svg id="map" viewBox="0 0 800 460" role="img" aria-label="Journey stops, station walking path, and simulated incident"></svg><p class="legend"><span>● Transit stops</span><span>━ Station walk</span><span>◆ Simulated incident</span></p></article>
+      <details><summary>Data and modeling assumptions</summary><ul id="limitations"></ul></details>
+    </section>
+  </main>
+  <footer>Transit data: Utah Transit Authority. Map data: <a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors · ODbL</a>. County boundary: UGRC · CC BY 4.0. Independent hackathon prototype; not an official UTA or UDOT service.</footer>
+</body>
+</html>
