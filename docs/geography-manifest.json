@@ -1,0 +1,24 @@
+{
+  "checked_at_utc": "2026-10-10T06:07:54.441308+00:00",
+  "county_boundary": {
+    "url": "https://services1.arcgis.com/99lidPhWCzftIe9K/arcgis/rest/services/UtahCountyBoundaries/FeatureServer/0/query?where=NAME%3D%27SALT+LAKE%27&outFields=%2A&outSR=4326&f=geojson",
+    "file": "data/raw/geography/salt_lake_county.geojson",
+    "bytes": 271903,
+    "sha256": "48ed7484218730ca005e4684972ef9c5b4943c39ffe083bff6d6c43013671e61",
+    "local_file_modified_utc": "2026-10-10T06:07:40.619552+00:00",
+    "attribution": "Utah Geospatial Resource Center",
+    "license": "CC BY 4.0",
+    "item": "90431cac2f9f49f4bcf1505419583753"
+  },
+  "osm": {
+    "url": "https://download.geofabrik.de/north-america/us/utah-latest.osm.pbf",
+    "file": "data/raw/geography/utah.osm.pbf",
+    "bytes": 169779035,
+    "sha256": "dcf2e80662ecd4633a875248a7ca7bcdfad8e5e70ebd6f320aa1992553263339",
+    "local_file_modified_utc": "2026-10-10T06:07:54.243885+00:00",
+    "attribution": "OpenStreetMap contributors; extract by Geofabrik",
+    "license": "ODbL 1.0",
+    "license_url": "https://www.openstreetmap.org/copyright"
+  },
+  "strategy": "Preserve full UTA GTFS. Select OSM ways intersecting the county without trimming their geometry."
+}

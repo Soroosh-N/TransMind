@@ -3,3 +3,9 @@
 /data/processed/*.json
 __pycache__/
 *.pyc
+.venv/
+.env
+.env.*
+!.env.example
+/data/raw/geography/
+/data/raw/realtime/
