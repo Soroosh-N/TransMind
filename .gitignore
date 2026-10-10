@@ -1,6 +1,6 @@
 /README.txt
 /data/raw/gtfs/*.zip
-/data/processed/*.json
+/data/processed/
 __pycache__/
 *.pyc
 .venv/
