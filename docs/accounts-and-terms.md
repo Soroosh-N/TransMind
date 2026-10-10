@@ -27,6 +27,17 @@ The event response includes position, direction, closure information, and
 sometimes polylines; it does not supply an empirically validated bus-delay model.
 No account, developer key, or successful authenticated call exists yet.
 
+The request form asks for a reason. It does not establish whether approval is
+automatic, guarantee acceptance, or give a response time. Submit early and keep
+the core simulation independent of approval. Suggested request text:
+
+> I am developing TransitMind for the Ensign BUILD 2026 Hackathon, focusing on
+> Salt Lake County. I would like to use UDOT traffic events, road closures, and
+> incident locations to identify potentially affected UTA transit journeys.
+> Data will be fetched by our backend, cached, and accessed within the documented
+> rate limit. The project will credit UDOT and distinguish observed incidents
+> from simulated delays. The API key will remain private.
+
 ## Hosting: user setup
 
 1. Create a [Render](https://render.com/) account.

@@ -6,7 +6,9 @@ TransitMind is a planned urban mobility intelligence platform for Salt Lake City
 
 ## Project status
 
-The project is in an early feasibility stage. A Python prototype downloads and audits the full UTA GTFS feed, computes a real bus-to-TRAX journey in Salt Lake County, and finds a replacement connection after a simulated delay. See [the feasibility result](docs/feasibility.md) for the measured outcome and modeling limitations. The API, website, geographic incident detection, and deployment have not yet been implemented. The capabilities below describe the intended MVP.
+The project has a working local demonstration. It preserves the full UTA GTFS feed, computes a real bus-to-TRAX journey in Salt Lake County, and finds a replacement connection after a simulated delay. A FastAPI backend serves the calculations and a responsive demonstration page. County membership, the Vine Street bus segment, and mapped station walking connectivity have been checked against geographic data. Twelve tests pass, and local HTTP checks confirm the API and page respond.
+
+The Render deployment configuration is prepared, but no remote deployment or smartphone verification has occurred. Browser visual QA was unavailable in the development session. General incident-to-route detection, live feeds, and county-wide walking routing remain unfinished. See [the feasibility result](docs/feasibility.md), [deployment instructions](docs/deployment.md), and [account setup](docs/accounts-and-terms.md).
 
 ## The demonstration
 
@@ -46,11 +48,11 @@ TransitMind will use a client-server architecture. The backend will perform tran
 | Transit processing | GTFS parsing and a schedule-aware routing algorithm |
 | Incident analysis | Geometric intersection analysis, with Shapely where useful |
 | Delay model | Deterministic, explainable downstream delay propagation |
-| Frontend | React or lightweight JavaScript, with responsive HTML and CSS |
-| Map | MapLibre GL JS |
+| Frontend | Current demo: lightweight JavaScript, HTML, and responsive CSS |
+| Map | Current demo: local geographic sketch; interactive MapLibre basemap planned |
 | Hosting | Prefer one deployable application serving the frontend and API |
 
-The frontend framework, routing implementation, dependencies, and hosting provider remain to be selected. Development will take place locally on Windows, with deployment to a remote server available to judges on different networks.
+The initial implementation uses a custom connection-scan routing prototype, FastAPI, Shapely, and OSM processing through pyosmium. Dependency versions are in `requirements.txt`. Render is the prepared early hosting option. Development takes place locally on Windows; public deployment remains a required milestone.
 
 ## Data and modeling principles
 
@@ -109,16 +111,19 @@ Deployment should happen early and be updated incrementally. The complete demons
 
 ## Running the project
 
-With Python 3.10 or later, run the feasibility prototype from the repository root:
+From the repository root, using Python 3.13:
 
 ```powershell
-python scripts/verify_transit.py --date 2026-10-09
-python -m unittest discover -s tests/backend -v
+python -m venv .venv
+.\.venv\Scripts\python -m pip install -r requirements.txt
+.\.venv\Scripts\python scripts/prepare_runtime.py --date 2026-10-09
+.\.venv\Scripts\python -m unittest discover -s tests/backend -v
+.\.venv\Scripts\python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000
 ```
 
-It uses only the Python standard library. The first run requires internet access to download the GTFS snapshot; later runs reuse it. The service date is a fixed demonstration date. The full feed is preserved; county-wide boundary filtering is not yet implemented.
+Open http://127.0.0.1:8000. API documentation is at `/docs`. The first preparation run requires internet access to download the GTFS snapshot; later runs reuse it. Runtime journey requests do not require external APIs. The service date is a fixed demonstration date, not a live departure time. The full feed is preserved.
 
-There are no runnable web services yet. Server setup, environment variables, API documentation, and the public demo URL will be added as implementation is completed and verified.
+See [deployment instructions](docs/deployment.md) for geographic reproduction and remote setup. There is no verified public demo URL yet. UDOT access is optional and requires a private developer key.
 
 ## Hackathon and open-source intent
 

@@ -3,8 +3,8 @@
 Run the standard-library prototype from the repository root:
 
 ```powershell
-python scripts/verify_transit.py --date 2026-10-09
-python -m unittest discover -s tests/backend -v
+.\.venv\Scripts\python scripts/verify_transit.py --date 2026-10-09
+.\.venv\Scripts\python -m unittest discover -s tests/backend -v
 ```
 
 The first command downloads the complete UTA feed to `data/raw/gtfs/UTA.zip`
@@ -63,6 +63,25 @@ downstream stops of that trip. Other trips remain unchanged.
 - Vehicle-block propagation, realtime ingestion, an API, UI, and deployment
   are not implemented yet.
 
-Next, validate the road segment and station transfer assumptions, move the
-prototype into backend modules, and expose the verified scenario through an API
-for early remote deployment.
+## Subsequent geographic and API checks
+
+The official county boundary confirms all eight journey stops are inside
+Salt Lake County. The selected bus segment's GTFS shape midpoint is 5.52 meters
+from the mapped Vine Street road geometry (OSM way `297639510`). This supports
+the scenario location; it does not validate the ten-minute delay assumption.
+
+OSM ways `148059447` and `254753016` provide connected pedestrian geometry
+between Murray Central Bay C and the TRAX stop. Including 1.2-meter and
+2.3-meter unverified stop connectors, the modeled path is approximately
+83 meters, or 70 seconds at 1.2 m/s. The runtime router now uses that measured
+link plus the two-minute boarding buffer. The 7:21 AM normal arrival and
+7:31 AM replacement arrival remain reproducible.
+
+The API and frontend now run locally. Twelve tests cover schedule feasibility,
+delay propagation, pickup/drop-off restrictions, walking connectivity, and API
+errors. Live HTTP checks also passed. Render setup is prepared; public HTTPS,
+visual browser QA, and physical smartphone verification are still outstanding.
+
+The limitations listed above describe the original prototype. The runtime now
+uses the measured station link; general road-impact detection, accessibility
+verification, live feeds, and county-wide pedestrian routing remain incomplete.
