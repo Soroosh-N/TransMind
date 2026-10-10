@@ -9,7 +9,7 @@ from fastapi.staticfiles import StaticFiles
 from starlette.middleware.gzip import GZipMiddleware
 
 from scripts.verify_transit import clock, plan, seconds
-from backend.app.incidents.impact import apply_delays, detect_impacts
+from backend.app.incidents.impact import apply_delays, detect_impacts, location_candidates
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -21,7 +21,7 @@ async def lifespan(app):
     yield
 
 
-app = FastAPI(title='TransitMind', version='0.2.0', lifespan=lifespan)
+app = FastAPI(title='TransitMind', version='0.3.0', lifespan=lifespan)
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 app.mount('/assets', StaticFiles(directory=ROOT / 'frontend/public'), name='assets')
 
@@ -40,7 +40,7 @@ def health():
 def ready():
     if app.state.runtime is None:
         raise HTTPException(503, 'Run scripts/prepare_runtime.py before serving journeys')
-    return {'status': 'ready', 'version': '0.2.0', 'service_date': app.state.runtime['audit']['service_date']}
+    return {'status': 'ready', 'version': '0.3.0', 'service_date': app.state.runtime['audit']['service_date']}
 
 
 def describe(runtime, result):
@@ -155,3 +155,27 @@ def options():
     runtime = app.state.runtime
     return {'stops': runtime['geography']['map']['stops'], 'origin_id': runtime['demo']['origin_id'],
             'destination_id': runtime['demo']['destination_id'], 'service_date': runtime['audit']['service_date']}
+
+
+@app.get('/api/disruption')
+def disruption(delay_minutes: int = Query(10, ge=0, le=60), start_time: str = '07:00',
+               duration_minutes: int = Query(20, ge=1, le=180),
+               direction: str = Query('both', pattern='^(westbound|eastbound|northbound|southbound|both)$'),
+               kind: str = Query('traffic', pattern='^(traffic|event|construction|accident)$'),
+               longitude: float = Query(-111.89123978336264, ge=-112.260169, le=-111.5532),
+               latitude: float = Query(40.664341702772894, ge=40.414175, le=40.921866),
+               radius: int = Query(20, ge=10, le=500),
+               origin_id: str | None = None, destination_id: str | None = None, departure_time: str | None = None):
+    if app.state.runtime is None:
+        raise HTTPException(503, 'Routing dataset is not prepared')
+    runtime = app.state.runtime
+    center = [longitude, latitude]
+    candidates = location_candidates(runtime, center, radius, direction) if delay_minutes else []
+    result = compute({**runtime, 'incident_candidates': candidates}, delay_minutes, start_time,
+                     duration_minutes, direction, origin_id, destination_id, departure_time)
+    result['map']['incident_center'] = center
+    result['map']['incident_radius_meters'] = radius
+    result['scenario'].update(kind=kind, road='Selected map area', source='User simulation')
+    result['limitations'][1] = 'Bus shapes must enter the selected area in the selected direction and time window. Proximity is a modeled exposure, not evidence of a real delay.'
+    result['limitations'].append('One disruption at a time; event and accident impacts use an explicit assumed delay, not attendance forecasts or road detour routing.')
+    return result

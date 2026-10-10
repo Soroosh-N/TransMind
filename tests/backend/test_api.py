@@ -93,3 +93,18 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(result['destination'], 'Murray North Station')
         self.assertEqual(result['baseline']['arrival'], '07:17:00')
         self.assertEqual(result['alternative']['arrival'], '07:27:00')
+
+
+    def test_map_selected_disruption(self):
+        response = self.client.get('/api/disruption?direction=westbound&kind=event')
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data['alternative']['arrival'], '07:31:00')
+        self.assertTrue(data['scenario']['missed_transfer'])
+        self.assertEqual(data['scenario']['source'], 'User simulation')
+        self.assertEqual(data['map']['incident_radius_meters'], 20)
+        away = self.client.get('/api/disruption?longitude=-112.2&latitude=40.8').json()
+        self.assertEqual(away['scenario']['affected_trip_count'], 0)
+        self.assertEqual(away['alternative']['arrival'], away['baseline']['arrival'])
+        self.assertEqual(self.client.get('/api/disruption?radius=9999').status_code, 422)
+        self.assertEqual(self.client.get('/api/disruption?kind=fake').status_code, 422)

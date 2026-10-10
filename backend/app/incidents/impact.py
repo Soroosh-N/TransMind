@@ -52,3 +52,35 @@ def apply_delays(edges, impacts, delay_seconds):
             arr += delay_seconds
         changed.append((dep, arr, a, b, trip, index, pickup, dropoff))
     return sorted(changed)
+
+
+def location_candidates(runtime, center, radius, direction):
+    """Match bus shape segments to a user-selected area, never rail services."""
+    matches, candidates = {}, []
+    for dep, arr, a, b, tid, index, pickup, dropoff in runtime['connections']:
+        trip = runtime['trips'][tid]
+        if runtime['routes'][trip['route_id']]['type'] != '3':
+            continue
+        key = (trip['pattern_id'], index)
+        if key not in matches:
+            pattern = runtime['patterns'][key[0]]
+            first, last = pattern['positions'][index:index+2]
+            coords = runtime['shapes'][pattern['shape_id']][first:last+1]
+            match = None
+            if len(coords) > 1:
+                # Cheap bounding-box rejection before geometric projection.
+                xs, ys = zip(*coords)
+                if min(xs)-radius/SCALE_X <= center[0] <= max(xs)+radius/SCALE_X and min(ys)-radius/SCALE_Y <= center[1] <= max(ys)+radius/SCALE_Y:
+                    line = LineString([(x*SCALE_X, y*SCALE_Y) for x,y in coords])
+                    point = Point(center[0]*SCALE_X, center[1]*SCALE_Y)
+                    if line.length and line.distance(point) <= radius:
+                        along = line.project(point)
+                        before, after = line.interpolate(max(0, along-5)), line.interpolate(min(line.length, along+5))
+                        dx, dy = after.x-before.x, after.y-before.y
+                        bearing = ('eastbound' if dx >= 0 else 'westbound') if abs(dx) >= abs(dy) else ('northbound' if dy >= 0 else 'southbound')
+                        match = {'fraction': along/line.length, 'direction': bearing, 'distance_meters': round(line.distance(point), 2)}
+            matches[key] = match
+        match = matches[key]
+        if match and (direction == 'both' or match['direction'] == direction):
+            candidates.append({**match, 'trip_id': tid, 'index': index, 'departure': dep, 'arrival': arr, 'route_id': trip['route_id'], 'from': a, 'to': b})
+    return candidates
