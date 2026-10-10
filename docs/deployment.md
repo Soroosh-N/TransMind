@@ -19,7 +19,7 @@ reports whether data is ready. The frontend and backend use the same origin.
 The preparation script downloads the full UTA ZIP only if it is absent, applies
 calendar exceptions, audits it, and generates compact connections for the fixed
 demonstration date. It retains complete trips and does not delete out-of-county
-stops. Generated runtime data is about 13 MB; the complete feed stays on disk.
+stops. Generated runtime data with route shapes is about 16 MB; the complete feed stays on disk.
 
 ## Reproduce the geographic checks
 
@@ -35,12 +35,12 @@ The measured scenario configuration is already in `data/scenarios/`.
 
 ## Render deployment: account action required
 
-No remote deployment has occurred yet. The following configuration is prepared
+The initial version is deployed at https://transitmind-hw1r.onrender.com/. Subsequent pushes to the linked branch can trigger deployment updates. The following configuration is prepared
 and locally tested; successful remote operation still needs verification.
 
 1. Create a Render account and connect GitHub.
 2. Ensure these commits are pushed to `Soroosh-N/TransMind`.
-3. In Render, choose **New → Blueprint**, select that repository and its `master`
+3. In Render, choose **New â†’ Blueprint**, select that repository and its `master`
    branch. The root `render.yaml` declares the web service and free plan.
 4. Review the service configuration and create the service. Alternatively,
    create a Python Web Service manually with:
@@ -61,10 +61,11 @@ plugin. No Render connection or provider key is currently available here.
 
 ## Availability and snapshot behavior
 
-The first remote build needs the UTA feed. Requests during the demo do not call
-UTA, UDOT, map tile servers, or a routing service: they recompute journeys from
-the prepared local connections. Assets and the geographic sketch are served
-locally. The sketch is not a full interactive basemap.
+The first remote build needs the UTA feed. Backend journey requests do not call
+UTA, UDOT, or an external routing service: they recompute journeys from
+the prepared local connections. Library assets, transit route geometry, and the fallback OSM road layer are served
+locally. Online street tiles are an optional external visual dependency; locally
+served roads preserve street context if tiles fail.
 
 A newly downloaded feed may change identifiers or no longer cover the fixed
 date. Preparation intentionally fails if the audited journey differs from the

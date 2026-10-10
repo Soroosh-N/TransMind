@@ -6,15 +6,15 @@ TransitMind is a planned urban mobility intelligence platform for Salt Lake City
 
 ## Project status
 
-The project has a working local demonstration. It preserves the full UTA GTFS feed, computes a real bus-to-TRAX journey in Salt Lake County, and finds a replacement connection after a simulated delay. A FastAPI backend serves the calculations and a responsive demonstration page. County membership, the Vine Street bus segment, and mapped station walking connectivity have been checked against geographic data. Twelve tests pass, and local HTTP checks confirm the API and page respond.
+The project has a working local demonstration. It preserves the full UTA GTFS feed, computes a real bus-to-TRAX journey in Salt Lake County, and finds a replacement connection after a simulated delay. A FastAPI backend serves the calculations and a responsive demonstration page. County membership, the Vine Street bus segment, and mapped station walking connectivity have been checked against geographic data. Seventeen backend tests pass. Desktop and mobile browser checks verify actual street tiles, route overlays, controls, and the local-road fallback.
 
-The Render deployment configuration is prepared, but no remote deployment or smartphone verification has occurred. Browser visual QA was unavailable in the development session. General incident-to-route detection, live feeds, and county-wide walking routing remain unfinished. See [the feasibility result](docs/feasibility.md), [deployment instructions](docs/deployment.md), and [account setup](docs/accounts-and-terms.md).
+The initial Render deployment is live at https://transitmind-hw1r.onrender.com/. The passenger workspace now includes an interactive street map, GTFS route-shape overlays, and spatial/time incident matching for the Vine Street scenario. General incident placement, live feeds, and county-wide walking routing remain unfinished. Dedicated driver, pedestrian, cyclist, and authority panels remain planned. See [the feasibility result](docs/feasibility.md), [deployment instructions](docs/deployment.md), and [account setup](docs/accounts-and-terms.md).
 
 ## The demonstration
 
 The core demonstration will follow one repeatable workflow:
 
-**Simulated incident → affected routes → estimated delays → missed transfers → alternative journey → passenger alert**
+**Simulated incident â†’ affected routes â†’ estimated delays â†’ missed transfers â†’ alternative journey â†’ passenger alert**
 
 1. Plan a normal journey using real Utah Transit Authority (UTA) route and schedule data.
 2. Activate a predefined, clearly labeled simulated road disruption.
@@ -49,7 +49,7 @@ TransitMind will use a client-server architecture. The backend will perform tran
 | Incident analysis | Geometric intersection analysis, with Shapely where useful |
 | Delay model | Deterministic, explainable downstream delay propagation |
 | Frontend | Current demo: lightweight JavaScript, HTML, and responsive CSS |
-| Map | Current demo: local geographic sketch; interactive MapLibre basemap planned |
+| Map | Leaflet street basemap with actual GTFS shapes and a local OSM road fallback |
 | Hosting | Prefer one deployable application serving the frontend and API |
 
 The initial implementation uses a custom connection-scan routing prototype, FastAPI, Shapely, and OSM processing through pyosmium. Dependency versions are in `requirements.txt`. Render is the prepared early hosting option. Development takes place locally on Windows; public deployment remains a required milestone.
@@ -68,30 +68,30 @@ UTA GTFS static data is the intended foundation for routes, stops, trips, schedu
 
 ```text
 TransMind/
-├── backend/
-│   └── app/
-│       ├── api/          # REST endpoints and request/response handling
-│       ├── transit/      # GTFS loading and transit network representation
-│       ├── incidents/    # Incident impact analysis and delay propagation
-│       ├── journeys/     # Routing, transfer checks, and journey comparisons
-│       └── alerts/       # Selected-commute impact and in-app alerts
-├── frontend/
-│   ├── public/           # Public static assets
-│   └── src/
-│       ├── api/          # Backend API client
-│       ├── components/   # Map, planner, journey panels, and controls
-│       └── styles/       # Shared styles and responsive layouts
-├── data/
-│   ├── raw/
-│   │   └── gtfs/         # Original transit feed snapshots
-│   ├── processed/        # Prepared network data and derived artifacts
-│   └── scenarios/        # Reproducible simulated incident definitions
-├── scripts/              # Data preparation and development utilities
-├── tests/
-│   ├── backend/          # Routing and incident-model verification
-│   └── frontend/         # UI and API integration verification
-├── deploy/               # Server and deployment configuration
-└── docs/                 # Architecture, assumptions, and demo notes
+â”œâ”€â”€ backend/
+â”‚   â””â”€â”€ app/
+â”‚       â”œâ”€â”€ api/          # REST endpoints and request/response handling
+â”‚       â”œâ”€â”€ transit/      # GTFS loading and transit network representation
+â”‚       â”œâ”€â”€ incidents/    # Incident impact analysis and delay propagation
+â”‚       â”œâ”€â”€ journeys/     # Routing, transfer checks, and journey comparisons
+â”‚       â””â”€â”€ alerts/       # Selected-commute impact and in-app alerts
+â”œâ”€â”€ frontend/
+â”‚   â”œâ”€â”€ public/           # Public static assets
+â”‚   â””â”€â”€ src/
+â”‚       â”œâ”€â”€ api/          # Backend API client
+â”‚       â”œâ”€â”€ components/   # Map, planner, journey panels, and controls
+â”‚       â””â”€â”€ styles/       # Shared styles and responsive layouts
+â”œâ”€â”€ data/
+â”‚   â”œâ”€â”€ raw/
+â”‚   â”‚   â””â”€â”€ gtfs/         # Original transit feed snapshots
+â”‚   â”œâ”€â”€ processed/        # Prepared network data and derived artifacts
+â”‚   â””â”€â”€ scenarios/        # Reproducible simulated incident definitions
+â”œâ”€â”€ scripts/              # Data preparation and development utilities
+â”œâ”€â”€ tests/
+â”‚   â”œâ”€â”€ backend/          # Routing and incident-model verification
+â”‚   â””â”€â”€ frontend/         # UI and API integration verification
+â”œâ”€â”€ deploy/               # Server and deployment configuration
+â””â”€â”€ docs/                 # Architecture, assumptions, and demo notes
 ```
 
 Several folders are placeholders. Git will track empty folders once files are added.
@@ -123,10 +123,12 @@ python -m venv .venv
 
 Open http://127.0.0.1:8000. API documentation is at `/docs`. The first preparation run requires internet access to download the GTFS snapshot; later runs reuse it. Runtime journey requests do not require external APIs. The service date is a fixed demonstration date, not a live departure time. The full feed is preserved.
 
-See [deployment instructions](docs/deployment.md) for geographic reproduction and remote setup. There is no verified public demo URL yet. UDOT access is optional and requires a private developer key.
+See [deployment instructions](docs/deployment.md) for geographic reproduction and remote setup. The existing demo URL is https://transitmind-hw1r.onrender.com/. UDOT access is optional and requires a private developer key.
 
 ## Hackathon and open-source intent
 
 The project is intended to have publicly available source code. Development must follow the competition's rules, including its development window and disclosure of AI assistance. This repository's initial setup and documentation have been assisted by OpenAI Codex.
 
 No open-source license has been selected yet. A license should be added before the project is presented as licensed open-source software.
+
+For the implemented model and mapping details, see [incident model](docs/incident-model.md) and [street maps](docs/maps.md).
