@@ -7,18 +7,21 @@
 </head><body>
 <header><span class="brand">TM</span><div><strong>TransitMind</strong><span>Salt Lake County</span></div><span class="workspace">Transit passengers</span><a href="/docs">API docs</a></header>
 <main>
-<section class="intro"><div><p class="eyebrow">TRANSIT IMPACT EXPLORER</p><h1>Your journey, on the map.</h1><p>Explore a real bus-to-TRAX journey and see how a simulated road disruption changes it.</p></div><span class="badge">Real schedules / simulated incident</span></section>
+<section class="intro"><div><p class="eyebrow">TRANSIT IMPACT EXPLORER</p><h1>Your journey, on the map.</h1><p>Place a traffic jam or event on the map. Discover affected services, broken connections, and your next feasible journey.</p></div><span class="badge">Real schedules / simulated incident</span></section>
 <section class="journey-controls" aria-label="Journey planner">
 <label>From<select id="origin" aria-label="Origin stop"></select></label><label>To<select id="destination" aria-label="Destination stop"></select></label><label>Departure<input type="time" id="departure" value="07:01" required></label>
-</section>
+<div class="commute-actions"><button id="save-commute" class="secondary">Save commute</button><button id="load-commute" class="secondary">Load saved commute</button><span id="commute-status" role="status"></span></div></section>
 <section class="controls" aria-label="Simulation controls">
-<div class="incident-title"><strong>Vine Street disruption</strong><span>Simulated / assumed delay</span></div>
-<label>Direction<select id="direction"><option value="westbound">Westbound</option><option value="eastbound">Eastbound</option><option value="both">Both directions</option></select></label>
+<div class="incident-title"><div><p class="eyebrow">DISRUPTION WORKSPACE</p><h2>What is happening on the road?</h2><span>User simulation | UDOT approval pending</span></div><button id="demo-location" class="secondary">Restore Vine Street demo</button></div>
+<div class="incident-editor"><label>Disruption type<select id="incident-kind"><option value="traffic">Traffic jam</option><option value="event">Public event</option><option value="construction">Construction</option><option value="accident">Accident</option></select></label><label>Area radius<select id="incident-radius"><option value="20">20 metres | road corridor</option><option value="100">100 metres | junction</option><option value="250">250 metres | venue area</option><option value="500">500 metres | neighbourhood</option></select></label><button id="place-incident" class="secondary">Choose location on map</button><span id="location-label">Vine Street | demo location</span></div>
+<p id="type-help">Assume an extra delay for buses crossing this area. This is not a live traffic observation.</p>
+<label>Direction<select id="direction"><option value="westbound">Westbound</option><option value="eastbound">Eastbound</option><option value="northbound">Northbound</option><option value="southbound">Southbound</option><option value="both">All directions</option></select></label>
 <label>Starts<input type="time" id="incident-start" value="07:00" required></label>
 <label>Duration<select id="incident-duration"><option value="10">10 minutes</option><option value="20" selected>20 minutes</option><option value="60">60 minutes</option></select></label>
-<label class="delay-control" for="delay">Bus delay: <strong id="delay-label">10 minutes</strong><input type="range" id="delay" min="0" max="30" value="10" step="1"></label>
-<button id="run">Calculate impact</button><button id="reset" class="secondary">No incident</button>
+<label class="delay-control" for="delay">Assumed added delay: <strong id="delay-label">10 minutes</strong><input type="range" id="delay" min="0" max="30" value="10" step="1"></label>
+<button id="run">Calculate impact</button><button id="reset" class="secondary">Deactivate</button>
 </section>
+<div id="active-incident" class="active-incident" role="status"></div>
 <p id="status" role="status" aria-live="polite">Loading transit schedules...</p>
 <div class="workspace-layout">
 <article class="map-panel"><div class="map-heading"><h2>Salt Lake County transit map</h2><button id="fit-map" class="secondary">Fit journey</button></div>
