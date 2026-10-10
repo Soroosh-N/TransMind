@@ -30,12 +30,12 @@ class ApiTests(unittest.TestCase):
     def test_every_returned_leg_matches_modified_schedule(self):
         runtime = app.state.runtime
         original = {(edge[4], edge[5]): edge for edge in runtime['connections']}
-        affected = runtime['demo']['scenario']['trip_id']
-        incident = next(leg['index'] for leg in runtime['demo']['baseline']['legs'] if leg.get('trip') == affected)
         for delay in (0, 2, 5, 10, 30):
             response = self.client.get(f'/api/demo?delay_minutes={delay}')
             self.assertEqual(response.status_code, 200)
-            journey = response.json()['alternative']
+            payload = response.json()
+            impacts = {item['trip_id']: item['first_affected_segment'] for item in payload['scenario']['impacts']}
+            journey = payload['alternative']
             self.assertIsNotNone(journey)
             previous = None
             for leg in journey['legs']:
@@ -46,9 +46,10 @@ class ApiTests(unittest.TestCase):
                     self.assertGreaterEqual(dep, seconds(previous['arrival']) + buffer)
                 if 'trip' in leg:
                     edge = original[(leg['trip'], leg['index'])]
-                    delta = delay * 60 if leg['trip'] == affected and leg['index'] >= incident else 0
+                    incident = impacts.get(leg['trip'])
+                    delta = delay * 60 if incident is not None and leg['index'] >= incident else 0
                     self.assertEqual(arr, edge[1] + delta)
-                    self.assertEqual(dep, edge[0] + (delta if leg['index'] > incident else 0))
+                    self.assertEqual(dep, edge[0] + (delta if incident is not None and leg['index'] > incident else 0))
                     self.assertEqual((leg['from'], leg['to']), (edge[2], edge[3]))
                 else:
                     self.assertEqual(arr - dep, max(60, runtime['geography']['transfer']['duration_seconds']))
@@ -68,3 +69,27 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn('TransitMind', response.text)
         self.assertEqual(self.client.get('/assets/app.js').status_code, 200)
+
+    def test_spatial_routes_time_filter_and_map_geometry(self):
+        default = self.client.get('/api/demo').json()
+        self.assertEqual(default['scenario']['affected_routes'], ['201', '45'])
+        self.assertEqual(default['scenario']['affected_trip_count'], 2)
+        self.assertGreater(len(default['map']['baseline_paths']), 0)
+        self.assertGreater(len(default['map']['baseline_paths'][0]['coordinates']), 2)
+        later = self.client.get('/api/demo?start_time=23:00').json()
+        self.assertEqual(later['scenario']['affected_trip_count'], 0)
+        self.assertEqual(later['alternative']['arrival'], later['baseline']['arrival'])
+        eastern = self.client.get('/api/demo?direction=eastbound').json()
+        self.assertNotIn('5916692', eastern['scenario']['affected_trip_ids'])
+        self.assertFalse(eastern['scenario']['missed_transfer'])
+        self.assertEqual(self.client.get('/api/demo?origin_id=invalid').status_code, 422)
+        self.assertEqual(self.client.get('/api/demo?start_time=garbage').status_code, 422)
+        self.assertEqual(self.client.get('/api/demo?direction=northbound').status_code, 422)
+
+    def test_origin_destination_selection(self):
+        options = self.client.get('/api/options').json()
+        self.assertEqual(len(options['stops']), 8)
+        result = self.client.get('/api/demo?destination_id=18391').json()
+        self.assertEqual(result['destination'], 'Murray North Station')
+        self.assertEqual(result['baseline']['arrival'], '07:17:00')
+        self.assertEqual(result['alternative']['arrival'], '07:27:00')
