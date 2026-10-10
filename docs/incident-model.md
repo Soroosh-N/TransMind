@@ -42,3 +42,10 @@ vehicle blocks, congestion feedback, multiple incidents, or delay-driven
 changes to the incident encounter times of other trips. The road location is
 currently the configured Vine Street scenario; arbitrary map incident placement
 and more general direction handling remain future work. UDOT is not required.
+
+
+## Editable area scenarios
+
+`/api/disruption` tests selected areas against bus shape segments. Direction follows the local tangent; encounter times interpolate scheduled stop times. The first matched segment receives an assumed delay that persists downstream. Rail services are excluded. Large areas may cover unrelated roads: proximity is modeled exposure, not observed traffic evidence.
+
+One active disruption is supported. Event attendance does not determine delay. Accident/construction scenarios model slowdown, not complete closure or detour routing. The editor and API explain these assumptions.

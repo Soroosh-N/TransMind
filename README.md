@@ -132,3 +132,16 @@ The project is intended to have publicly available source code. Development must
 No open-source license has been selected yet. A license should be added before the project is presented as licensed open-source software.
 
 For the implemented model and mapping details, see [incident model](docs/incident-model.md) and [street maps](docs/maps.md).
+
+
+### Editable disruptions (v0.3)
+
+Choose traffic jam, public event, construction, or accident; click **Choose location on map** and select a radius, direction, active window, and assumed added delay. The backend matches real bus shapes and scheduled crossing times, propagates delay downstream, detects broken transfers, and recalculates journeys. **Restore Vine Street demo** restores the reproducible example.
+
+Save/load your commute on this device for personalized in-app alerts. Preferences use browser localStorage; no cross-device sync or background notifications.
+
+One disruption at a time. All types use an explicit delay assumption: no attendance-based congestion forecasts, complete road closures, or road detours. UDOT access remains pending. Placement is restricted to the county map extent, not a point-in-polygon boundary check. Journey choices remain the eight verified corridor stops and fixed October 9, 2026 schedule.
+
+`GET /api/disruption`: `kind`, `longitude`, `latitude`, `radius` (10-500 metres), `direction`, `start_time`, `duration_minutes`, `delay_minutes`, and existing journey parameters. `/api/demo` remains available.
+
+Verified with 18 backend tests and desktop/mobile browser checks covering map placement, event areas, saved commute persistence, demo restoration, routing, and unavailable online tiles. Run `python tests/frontend/verify_disruptions.py --url http://127.0.0.1:8002` against a running service.
